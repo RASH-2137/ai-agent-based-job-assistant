@@ -18,11 +18,7 @@ def _get_llm():
 
 
 def get_messaging_agent():
-    """
-    Creates and returns an AI agent specialized in
-    writing short, professional outreach messages
-    for recruiters or hiring managers.
-    """
+    """Agent that writes short, professional outreach messages for recruiters or hiring managers."""
     return Agent(
         role="Outreach Messaging Specialist",
         goal=(
@@ -40,10 +36,7 @@ def get_messaging_agent():
 
 
 def create_messaging_task(agent, job_summary, agency_name, user_bio):
-    """
-    Creates a task that generates a short outreach message
-    tailored to a job, agency, and candidate profile.
-    """
+    """Task: generate a short outreach message tailored to job, agency, and candidate bio."""
 
     prompt = f"""
 You are given:

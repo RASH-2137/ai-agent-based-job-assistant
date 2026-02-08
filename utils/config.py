@@ -2,21 +2,19 @@ import os
 
 from dotenv import load_dotenv
 
-# Resolve possible project roots (app may be run from a different working directory)
 _utils_dir = os.path.dirname(os.path.abspath(__file__))
 _project_root_from_file = os.path.dirname(_utils_dir)
 _cwd = os.getcwd()
 
-# Load .env from every likely location so it works regardless of run context
 for _dir in (_project_root_from_file, _cwd, os.path.dirname(_cwd)):
     if _dir:
         _env_file = os.path.join(_dir, ".env")
         if os.path.isfile(_env_file):
             load_dotenv(dotenv_path=_env_file)
-load_dotenv()  # dotenv default: cwd and parents
+load_dotenv()
 
-# If keys still missing, try manual parse from first .env we find (handles encoding/parsing quirks)
 def _load_env_manually():
+    """Fallback: parse .env by hand if load_dotenv missed keys (e.g. encoding quirks)."""
     for _dir in (_project_root_from_file, _cwd):
         _env_file = os.path.join(_dir, ".env")
         if os.path.isfile(_env_file):
@@ -39,7 +37,7 @@ _load_env_manually()
 
 
 def _normalize_env(key):
-    """Read env var and strip whitespace + optional surrounding quotes (handles KEY = \"value\" format)."""
+    """Read env var; strip whitespace and optional surrounding quotes."""
     val = os.getenv(key)
     if val is None:
         return None
@@ -50,25 +48,23 @@ def _normalize_env(key):
 
 
 USAJOBS_API_KEY = _normalize_env("USAJOBS_API_KEY")
-# Library accepts GOOGLE_API_KEY or GEMINI_API_KEY; prefer GEMINI for this project
 GEMINI_API_KEY = _normalize_env("GEMINI_API_KEY") or _normalize_env("GOOGLE_API_KEY")
 
 
 def _env_locations_checked():
-    """Paths where we looked for .env (for error messages)."""
+    """Paths checked for .env (used in error messages)."""
     locs = [os.path.join(_project_root_from_file, ".env"), os.path.join(_cwd, ".env")]
     return [p for p in locs if p]
 
 
 def require_gemini_api_key():
-    """Return the Gemini API key, or raise a clear error if missing (e.g. .env not set)."""
+    """Return the Gemini API key, or raise ValueError with instructions if missing."""
     key = (GEMINI_API_KEY or "").strip()
     if not key:
         locs = _env_locations_checked()
+        where = ("; ".join(locs) if locs else "current directory")
         raise ValueError(
-            "Gemini API key is missing.\n\n"
-            "• Put GEMINI_API_KEY=your_key in a .env file (one variable per line, no spaces around =).\n"
-            "• App looked for .env here: " + ("; ".join(locs) if locs else "(unknown)") + "\n"
-            "• Get a key: https://aistudio.google.com/apikey"
+            f"Gemini API key is missing. Add GEMINI_API_KEY=your_key to a .env file. "
+            f"App looked for .env in: {where}. Get a key: https://aistudio.google.com/apikey"
         )
     return key

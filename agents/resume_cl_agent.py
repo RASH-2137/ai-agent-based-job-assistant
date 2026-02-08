@@ -25,9 +25,9 @@ def get_resume_cl_agent():
             "role-specific cover letters based on job descriptions."
         ),
         backstory=(
-            "You are an expert career assistant wtih deep experience in "
-            "goverment hiring processes, ATS-friendly resume writing, "
-            "and professional cover letter drafting"
+            "You are an expert career assistant with deep experience in "
+            "government hiring processes, ATS-friendly resume writing, "
+            "and professional cover letter drafting."
         ),
         llm=_get_llm(),
         verbose=True,
@@ -35,9 +35,6 @@ def get_resume_cl_agent():
 
 
 def create_resume_cl_task(agent, job_summary, resume_text):
-    # create a task that tailors a resume summary and generates a personalized
-    # cover letter for a government job
-
     prompt = f"""
 you are given:
 1. A summarized job description

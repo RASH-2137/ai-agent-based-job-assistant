@@ -17,7 +17,7 @@ def fetch_usajobs(keyword, location=None, results_per_page=10):
     headers = {
         "Authorization-Key": USAJOBS_API_KEY.strip(),
         "Accept": "application/json",
-        "User-Agent": "JobHuntAssistant/1.0 (mailto:user@example.com)",
+        "User-Agent": "JobHuntAssistant/1.0 (Streamlit; USAJOBS API client)",
     }
     params = {
         "Keyword": keyword,

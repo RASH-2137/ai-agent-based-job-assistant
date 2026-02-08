@@ -4,29 +4,21 @@ from usajobs_api import fetch_usajobs
 from orchestrator import run_pipeline
 
 
-st.title("🧠 AI Job Hunt Assistant")
-st.markdown(
-    "Select one or more jobs and let the AI tailor your application."
-)
+st.title("Job Hunt Assistant")
+st.markdown("Search USAJOBS, select listings, and run the pipeline to get a tailored resume summary, cover letter, and outreach message.")
 
-# -----------------------------
-# User Inputs
-# -----------------------------
-job_keyword = st.text_input("Job keyword", value="data analyst")
+job_keyword = st.text_input("Job keyword", placeholder="e.g. data analyst")
 job_location = st.text_input(
     "Location (optional – leave blank for nationwide)",
-    value="",
-    placeholder="e.g. Washington DC or leave empty",
+    placeholder="e.g. Washington DC",
 )
-resume_text = st.text_area("Resume text", height=200)
+resume_text = st.text_area("Resume text", height=200, placeholder="Paste your resume text here.")
 user_bio = st.text_input(
     "Short bio",
-    value="I'm a data professional passionate about public service.",
+    placeholder="e.g. Data analyst with 3 years in public sector",
 )
 
-# -----------------------------
-# Fetch Jobs
-# -----------------------------
+# Fetch jobs
 if st.button("🔍 Fetch Jobs"):
     if not resume_text.strip():
         st.error("Please enter your resume text.")
@@ -42,9 +34,7 @@ if st.button("🔍 Fetch Jobs"):
             if not st.session_state.jobs:
                 st.info("No jobs found for that keyword. Try a different term or leave location blank for nationwide search.")
 
-# -----------------------------
-# Show Jobs with Checkboxes
-# -----------------------------
+# Job selection
 selected_jobs = []
 
 if "jobs" in st.session_state and st.session_state.jobs:
@@ -58,9 +48,7 @@ if "jobs" in st.session_state and st.session_state.jobs:
         if st.checkbox(f"{title} — {agency}", key=f"job_{idx}"):
             selected_jobs.append(job)
 
-# -----------------------------
-# Run Pipeline for Selected Jobs
-# -----------------------------
+# Run pipeline for selected jobs
 if st.button("🚀 Apply to Selected Jobs"):
     if not selected_jobs:
         st.warning("Please select at least one job.")
@@ -71,7 +59,7 @@ if st.button("🚀 Apply to Selected Jobs"):
 
             st.markdown(f"## 📄 {title}")
 
-            with st.spinner("Running AI agents..."):
+            with st.spinner("Running pipeline..."):
                 try:
                     result = run_pipeline(
                         job_data=job,

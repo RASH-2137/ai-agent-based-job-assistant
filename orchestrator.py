@@ -31,36 +31,25 @@ def extract_between_markers(text, start_marker, end_marker):
         return ""
 
 
-
-
-
-
-
 def run_pipeline(job_data, resume_text, user_bio):
-    """
-    Runs the full agent workflow for ONE selected job.
-    """
-
+    """Run the full pipeline for one selected job: agents, parse output, log and save cover letter."""
     descriptor = job_data.get("MatchedObjectDescriptor", {})
 
     job_summary = (
         descriptor.get("UserArea", {})
-                  .get("Details", {})
-                  .get("JobSummary", "")
+        .get("Details", {})
+        .get("JobSummary", "")
     )
-
     agency_name = descriptor.get("OrganizationName", "Government Agency")
     job_title = descriptor.get("PositionTitle", "Job Role")
 
     if not job_summary:
         return "❌ Job summary not found."
 
-    # Create agents
     jd_agent = get_jd_analyst_agent()
     resume_agent = get_resume_cl_agent()
     messaging_agent = get_messaging_agent()
 
-    # Create tasks
     jd_task = create_jd_analysis_task(jd_agent, job_summary)
 
     resume_task = create_resume_cl_task(
@@ -76,7 +65,6 @@ def run_pipeline(job_data, resume_text, user_bio):
         user_bio
     )
 
-    # Run Crew
     crew = Crew(
         agents=[jd_agent, resume_agent, messaging_agent],
         tasks=[jd_task, resume_task, messaging_task],
@@ -86,9 +74,6 @@ def run_pipeline(job_data, resume_text, user_bio):
 
     result = crew.kickoff()
 
-    # -----------------------------
-    # Extract resume agent output
-    # -----------------------------
     resume_output = str(resume_task.output)
 
     resume_summary = extract_between_markers(
@@ -103,18 +88,11 @@ def run_pipeline(job_data, resume_text, user_bio):
         "<<END>>" if "<<END>>" in resume_output else None,
     )
 
-    # -----------------------------
-    # Log application
-    # -----------------------------
     log_application(
         job_title=job_title,
         agency=agency_name,
         resume_summary=resume_summary
     )
-
-    # -----------------------------
-    # Save cover letter file
-    # -----------------------------
     save_cover_letter_file(
         job_title=job_title,
         agency=agency_name,
@@ -122,6 +100,4 @@ def run_pipeline(job_data, resume_text, user_bio):
     )
 
     return result
-
-
 

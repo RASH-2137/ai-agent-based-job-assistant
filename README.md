@@ -1,21 +1,14 @@
-# AI Job Hunt Assistant
+# Job Hunt Assistant
 
-A local Streamlit app that uses **CrewAI** and **Google Gemini** to tailor your resume and cover letter for USAJOBS listings. You select jobs from search results and run a multi-agent pipeline to get a tailored resume summary, cover letter, and outreach message.
+A Streamlit app to streamline applying to federal jobs on USAJOBS: search by keyword, pick listings, and run a pipeline (CrewAI + Google Gemini) to get a tailored resume summary, cover letter, and outreach message. Runs locally; you supply your own API keys.
 
 ## Architecture
 
-- **Streamlit UI** (`streamlit_app.py`): Job keyword search, resume/bio inputs, job selection, and "Apply to Selected Jobs" triggers the pipeline per job.
-- **USAJOBS API** (`usajobs_api.py`): Fetches job listings from the official USAJOBS API (real API; requires `USAJOBS_API_KEY`).
-- **Orchestrator** (`orchestrator.py`): For each selected job, builds a sequential Crew of three agents, runs them, parses the resume agent’s output (markers `<<RESUME_SUMMARY>>`, `<<COVER_LETTER>>`), then logs the application and saves the cover letter under `data/`.
-- **Agents** (under `agents/`):
-  - **JD Analyst** (`jd_analyst.py`): Analyzes job descriptions and outputs Responsibilities, Required Skills, Qualifications (Gemini 2.0 Flash).
-  - **Resume & Cover Letter** (`resume_cl_agent.py`): Tailors resume summary and writes a government-style cover letter with fixed markers for parsing (Gemini 2.0 Flash).
-  - **Messaging** (`messaging_agent.py`): Writes a short outreach message for recruiters/hiring managers (Gemini 2.5 Flash).
-- **Utils**:
-  - **Config** (`utils/config.py`): Loads `.env` from the project root; exposes `USAJOBS_API_KEY` and `GEMINI_API_KEY`.
-  - **Tracking** (`utils/tracking.py`): Writes cover letters to `data/cover_letters/` and appends rows to `data/applications_log.csv`.
-
-All APIs are **real** (Gemini + USAJOBS); there is no mock mode.
+- **Streamlit UI** (`streamlit_app.py`): Keyword search, resume/bio inputs, job selection, and "Apply to Selected Jobs" to run the pipeline per job.
+- **USAJOBS API** (`usajobs_api.py`): Fetches listings from the official USAJOBS API.
+- **Orchestrator** (`orchestrator.py`): For each selected job, runs a sequential Crew of three agents, parses output (markers `<<RESUME_SUMMARY>>`, `<<COVER_LETTER>>`), logs the application, and saves the cover letter under `data/`.
+- **Agents** (`agents/`): JD Analyst (job description → responsibilities, skills, qualifications); Resume & Cover Letter (tailored summary + government-style cover letter); Messaging (short outreach for recruiters). All use Google Gemini (2.0/2.5 Flash).
+- **Utils**: Config loads `.env` for `USAJOBS_API_KEY` and `GEMINI_API_KEY`. Tracking writes cover letters to `data/cover_letters/` and appends to `data/applications_log.csv`.
 
 ## Requirements
 
@@ -86,6 +79,12 @@ project_root/
 └── README.md
 ```
 
+## Notes
+
+- **API keys:** You need a [USAJOBS API key](https://developer.usajobs.gov/APIRequest/Register) and a [Gemini API key](https://aistudio.google.com/apikey). Put them in `.env` (copy from `.env.example`). No mock mode; the app calls real APIs.
+- **Scope:** Built for USAJOBS federal listings. Output quality depends on the LLM (Gemini); always review generated cover letters and messages before sending.
+- **Data:** All generated files (cover letters, application log) live under `data/`. No data is sent except to USAJOBS and Google as required for search and generation.
+
 ## License
 
-Use and modify as needed for your job search. USAJOBS and Google APIs are subject to their respective terms of use.
+Use and modify as needed. USAJOBS and Google APIs are subject to their respective terms of use.
